@@ -13,6 +13,12 @@ variable "cloudflare_zone_id" {
   type        = string
 }
 
+variable "cloudflare_api_token" {
+  description = "Cloudflare API Token with necessary permissions"
+  type        = string
+  sensitive   = true
+}
+
 variable "price_class" {
   description = "CloudFront price class"
   type        = string

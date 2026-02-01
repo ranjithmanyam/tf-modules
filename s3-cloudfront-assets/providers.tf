@@ -1,3 +1,16 @@
+terraform {
+  required_providers {
+    vault = {
+      source  = "hashicorp/vault"
+      version = "~> 5.1.0"
+    }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5.16.0"
+    }
+  }
+}
+
 provider "aws" {
   region = "eu-west-2"
 }

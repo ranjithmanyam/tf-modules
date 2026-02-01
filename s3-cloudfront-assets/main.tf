@@ -32,7 +32,7 @@ resource "aws_acm_certificate" "cdn" {
   tags = var.tags
 }
 
-resource "cloudflare_record" "acm_validation" {
+resource "cloudflare_dns_record" "acm_validation" {
   for_each = {
     for dvo in aws_acm_certificate.cdn.domain_validation_options :
     dvo.domain_name => {
@@ -45,7 +45,7 @@ resource "cloudflare_record" "acm_validation" {
   zone_id = var.cloudflare_zone_id
   name    = each.value.name
   type    = each.value.type
-  value   = each.value.value
+  content = each.value.value
   ttl     = 300
   proxied = false
 }
@@ -55,7 +55,7 @@ resource "aws_acm_certificate_validation" "cdn" {
 
   certificate_arn = aws_acm_certificate.cdn.arn
   validation_record_fqdns = [
-    for r in cloudflare_record.acm_validation : r.hostname
+    for r in cloudflare_dns_record.acm_validation : r.name
   ]
 }
 
@@ -141,15 +141,11 @@ resource "aws_s3_bucket_policy" "assets" {
 # Cloudflare DNS
 ############################
 
-resource "cloudflare_record" "cdn" {
+resource "cloudflare_dns_record" "cdn" {
   zone_id = var.cloudflare_zone_id
-  name    = trimsuffix(var.domain_name, ".${data.cloudflare_zone.zone.name}")
+  name    = var.domain_name
   type    = "CNAME"
-  value   = aws_cloudfront_distribution.cdn.domain_name
+  content = aws_cloudfront_distribution.cdn.domain_name # Changed from 'value' to 'content'
   ttl     = 300
   proxied = false
-}
-
-data "cloudflare_zone" "zone" {
-  zone_id = var.cloudflare_zone_id
 }
